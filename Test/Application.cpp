@@ -74,6 +74,19 @@ int Applicataion::Execute()
         throw std::exception("PxCreatePhysics failed!");
     }
 
+
+    // Create CPU dispatcher
+    auto m_Dispatcher = physx::PxDefaultCpuDispatcherCreate(2);
+
+    // Create scene
+    physx::PxSceneDesc scene_desc(m_Physics->getTolerancesScale());
+    scene_desc.gravity = physx::PxVec3(0.0f, -9.81f, 0.0f);
+    scene_desc.cpuDispatcher = m_Dispatcher;
+    scene_desc.filterShader = physx::PxDefaultSimulationFilterShader;
+    // scene_desc.simulationEventCallback = this;
+
+    physx::PxScene* m_Scene = m_Physics->createScene(scene_desc);
+
     // Starts the timer
     m_Timer.Start();
 
@@ -123,6 +136,9 @@ int Applicataion::Execute()
             CalculateFramesPerSecond();
 
             MoveDirectionalLight();
+
+            m_Scene->simulate(static_cast<physx::PxReal>(m_Timer.DeltaTime()));
+            m_Scene->fetchResults(true);
 
             // Clear the buffers
             m_DxRenderer->Clear();
