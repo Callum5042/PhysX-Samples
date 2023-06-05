@@ -115,38 +115,7 @@ int Applicataion::Execute()
 
 void Applicataion::MoveDirectionalLight()
 {
-    auto inputs = SDL_GetKeyboardState(nullptr);
     float delta_time = static_cast<float>(m_Timer.DeltaTime());
-
-    // Move forward/backward along Z-axis
-    if (inputs[SDL_SCANCODE_W])
-    {
-        m_DxDirectionalLight->World *= DirectX::XMMatrixTranslation(0.0f, 0.0f, 1.0f * delta_time);
-    }
-    else if (inputs[SDL_SCANCODE_S])
-    {
-        m_DxDirectionalLight->World *= DirectX::XMMatrixTranslation(0.0f, 0.0f, -1.0f * delta_time);
-    }
-
-    // Move left/right along X-axis
-    if (inputs[SDL_SCANCODE_A])
-    {
-        m_DxDirectionalLight->World *= DirectX::XMMatrixTranslation(-1.0f * delta_time, 0.0f, 0.0f);
-    }
-    else if (inputs[SDL_SCANCODE_D])
-    {
-        m_DxDirectionalLight->World *= DirectX::XMMatrixTranslation(1.0f * delta_time, 0.0f, 0.0f);
-    }
-
-    // Move up/down along Y-axis v
-    if (inputs[SDL_SCANCODE_E])
-    {
-        m_DxDirectionalLight->World *= DirectX::XMMatrixTranslation(0.0f, 1.0f * delta_time, 0.0f);
-    }
-    else if (inputs[SDL_SCANCODE_Q])
-    {
-        m_DxDirectionalLight->World *= DirectX::XMMatrixTranslation(0.0f, -1.0f * delta_time, 0.0f);
-    }
 
     // Decompose matrix for position
     DirectX::XMVECTOR scale;
