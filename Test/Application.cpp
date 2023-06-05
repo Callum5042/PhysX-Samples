@@ -24,38 +24,7 @@ Applicataion::~Applicataion()
 
 int Applicataion::Execute()
 {
-    // Initialise SDL subsystems and creates the window
-    if (!SDLInit())
-        return -1;
-
-    // Initialise and create the DirectX 11 renderer
-    m_DxRenderer = std::make_unique<DX::Renderer>(m_SdlWindow);
-    m_DxRenderer->Create();
-
-    // Initialise and create the DirectX 11 model
-    m_DxModel = std::make_unique<DX::Model>(m_DxRenderer.get());
-    m_DxModel->Create();
-
-    m_DxFloor = std::make_unique<DX::Floor>(m_DxRenderer.get());
-    m_DxFloor->Create();
-
-    m_DxDirectionalLight = std::make_unique<DX::DirectionalLight>(m_DxRenderer.get());
-    m_DxDirectionalLight->Create();
-
-    // Initialise and create the DirectX 11 shader
-    m_DxShader = std::make_unique<DX::Shader>(m_DxRenderer.get());
-    m_DxShader->LoadVertexShader("Shaders/VertexShader.cso");
-    m_DxShader->LoadPixelShader("Shaders/PixelShader.cso");
-
-    // Initialise and setup the perspective camera
-    auto window_width = 0;
-    auto window_height = 0;
-    SDL_GetWindowSize(m_SdlWindow, &window_width, &window_height);
-
-    m_DxCamera = std::make_unique<DX::Camera>(window_width, window_height);
-
     // Physics
-    // Create foundation
     m_Foundation = PxCreateFoundation(PX_PHYSICS_VERSION, m_DefaultAllocatorCallback, m_DefaultErrorCallback);
     if (m_Foundation == nullptr)
     {
@@ -74,7 +43,6 @@ int Applicataion::Execute()
         throw std::exception("PxCreatePhysics failed!");
     }
 
-
     // Create CPU dispatcher
     auto m_Dispatcher = physx::PxDefaultCpuDispatcherCreate(2);
 
@@ -86,6 +54,36 @@ int Applicataion::Execute()
     // scene_desc.simulationEventCallback = this;
 
     physx::PxScene* m_Scene = m_Physics->createScene(scene_desc);
+
+    // Initialise SDL subsystems and creates the window
+    if (!SDLInit())
+        return -1;
+
+    // Initialise and create the DirectX 11 renderer
+    m_DxRenderer = std::make_unique<DX::Renderer>(m_SdlWindow);
+    m_DxRenderer->Create();
+
+    // Initialise and create the DirectX 11 model
+    m_DxModel = std::make_unique<DX::Model>(m_DxRenderer.get(), m_Physics, m_Scene);
+    m_DxModel->Create(0.0f, 10.0f, 0.0f);
+
+    m_DxFloor = std::make_unique<DX::Floor>(m_DxRenderer.get());
+    m_DxFloor->Create();
+
+    m_DxDirectionalLight = std::make_unique<DX::DirectionalLight>(m_DxRenderer.get());
+    m_DxDirectionalLight->Create();
+
+    // Initialise and create the DirectX 11 shader
+    m_DxShader = std::make_unique<DX::Shader>(m_DxRenderer.get());
+    m_DxShader->LoadVertexShader("Shaders/VertexShader.cso");
+    m_DxShader->LoadPixelShader("Shaders/PixelShader.cso");
+
+    // Initialise and setup the perspective camera
+    auto window_width = 0;
+    auto window_height = 0;
+    SDL_GetWindowSize(m_SdlWindow, &window_width, &window_height);
+
+    m_DxCamera = std::make_unique<DX::Camera>(window_width, window_height);
 
     // Starts the timer
     m_Timer.Start();
@@ -147,6 +145,7 @@ int Applicataion::Execute()
             m_DxShader->Use();
 
             // Render the model
+            m_DxModel->Update();
             m_DxShader->UpdateWorldBuffer(m_DxModel->World);
             m_DxModel->Render();
 

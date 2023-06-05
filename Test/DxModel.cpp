@@ -2,17 +2,33 @@
 #include <DirectXMath.h>
 #include "GeometryGenerator.h"
 
-DX::Model::Model(DX::Renderer* renderer) : m_DxRenderer(renderer)
+DX::Model::Model(DX::Renderer* renderer, physx::PxPhysics* physics, physx::PxScene* scene) : m_DxRenderer(renderer), m_Physics(physics), m_Scene(scene)
 {
 }
 
-void DX::Model::Create()
+void DX::Model::Create(float x, float y, float z)
 {
 	GeometryGenerator::CreateBox(1.0f, 1.0f, 1.0f, &m_MeshData);
 
 	// Create input buffers
 	CreateVertexBuffer();
 	CreateIndexBuffer();
+
+	// Create dynamic objects
+	auto material = m_Physics->createMaterial(0.4f, 0.4f, 0.4f);
+	auto shape = m_Physics->createShape(physx::PxBoxGeometry(1.0f, 1.0f, 1.0f), *material);
+
+	// Set position
+	physx::PxVec3 position = physx::PxVec3(physx::PxReal(x), physx::PxReal(y), physx::PxReal(z));
+	physx::PxTransform transform(position);
+
+	m_Body = m_Physics->createRigidDynamic(transform);
+	m_Body->attachShape(*shape);
+	physx::PxRigidBodyExt::updateMassAndInertia(*m_Body, 100.0f);
+	m_Scene->addActor(*m_Body);
+
+	World = DirectX::XMMatrixIdentity();
+	World = DirectX::XMMatrixTranslation(x, y, z);
 }
 
 void DX::Model::CreateVertexBuffer()
@@ -66,5 +82,16 @@ void DX::Model::Render()
 
 	// Render geometry
 	d3dDeviceContext->DrawIndexed(static_cast<UINT>(m_MeshData.indices.size()), 0, 0);
+}
+
+void DX::Model::Update()
+{
+	physx::PxTransform global_pose = m_Body->getGlobalPose();
+
+	float x = global_pose.p.x;
+	float y = global_pose.p.y;
+	float z = global_pose.p.z;
+
+	World = DirectX::XMMatrixTranslation(x, y, z);
 }
  
