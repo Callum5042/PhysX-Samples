@@ -2,7 +2,7 @@
 #include <DirectXMath.h>
 #include "GeometryGenerator.h"
 
-DX::Floor::Floor(DX::Renderer* renderer) : m_DxRenderer(renderer)
+DX::Floor::Floor(DX::Renderer* renderer, physx::PxPhysics* physics, physx::PxScene* scene) : m_DxRenderer(renderer), m_Physics(physics), m_Scene(scene)
 {
 	World *= DirectX::XMMatrixTranslation(0.0f, -1.0f, 0.0f);
 }
@@ -14,6 +14,18 @@ void DX::Floor::Create()
 	// Create input buffers
 	CreateVertexBuffer();
 	CreateIndexBuffer();
+
+	physx::PxShapeFlags shapeFlags = physx::PxShapeFlag::eVISUALIZATION | physx::PxShapeFlag::eSCENE_QUERY_SHAPE | physx::PxShapeFlag::eSIMULATION_SHAPE;
+	physx::PxMaterial* materialPtr = m_Physics->createMaterial(0.4f, 0.4f, 0.4f);;
+
+	physx::PxRigidStatic* rigidStatic = m_Physics->createRigidStatic(physx::PxTransformFromPlaneEquation(physx::PxPlane(physx::PxVec3(0.f, 1.f, 0.f), 1.f)));
+	{
+		physx::PxShape* shape = m_Physics->createShape(physx::PxPlaneGeometry(), &materialPtr, 1, true, shapeFlags);
+		rigidStatic->attachShape(*shape);
+		shape->release(); // this way shape gets automatically released with actor
+	}
+
+	m_Scene->addActor(*rigidStatic);
 }
 
 void DX::Floor::CreateVertexBuffer()

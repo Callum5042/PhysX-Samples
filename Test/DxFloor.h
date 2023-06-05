@@ -3,13 +3,14 @@
 #include "DxRenderer.h"
 #include <DirectXMath.h>
 #include "Vertex.h"
+#include "PxPhysicsAPI.h"
 
 namespace DX
 {
 	class Floor
 	{
 	public:
-		Floor(DX::Renderer* renderer);
+		Floor(DX::Renderer* renderer, physx::PxPhysics* physics, physx::PxScene* scene);
 		virtual ~Floor() = default;
 
 		// Create device
@@ -34,5 +35,10 @@ namespace DX
 
 		// Mesh data
 		MeshData m_MeshData;
+
+		// Physics
+		physx::PxPhysics* m_Physics = nullptr;
+		physx::PxScene* m_Scene = nullptr;
+		physx::PxRigidBody* m_Body = nullptr;
 	};
 }

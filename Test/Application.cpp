@@ -67,7 +67,7 @@ int Applicataion::Execute()
     m_DxModel = std::make_unique<DX::Model>(m_DxRenderer.get(), m_Physics, m_Scene);
     m_DxModel->Create(0.0f, 10.0f, 0.0f);
 
-    m_DxFloor = std::make_unique<DX::Floor>(m_DxRenderer.get());
+    m_DxFloor = std::make_unique<DX::Floor>(m_DxRenderer.get(), m_Physics, m_Scene);
     m_DxFloor->Create();
 
     m_DxDirectionalLight = std::make_unique<DX::DirectionalLight>(m_DxRenderer.get());
