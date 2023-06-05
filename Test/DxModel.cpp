@@ -88,10 +88,8 @@ void DX::Model::Update()
 {
 	physx::PxTransform global_pose = m_Body->getGlobalPose();
 
-	float x = global_pose.p.x;
-	float y = global_pose.p.y;
-	float z = global_pose.p.z;
-
-	World = DirectX::XMMatrixTranslation(x, y, z);
+	World = DirectX::XMMatrixIdentity();
+	World *= DirectX::XMMatrixRotationQuaternion(DirectX::XMVectorSet(global_pose.q.x, global_pose.q.y, global_pose.q.z, global_pose.q.w));
+	World *= DirectX::XMMatrixTranslation(global_pose.p.x, global_pose.p.y, global_pose.p.z);
 }
  
