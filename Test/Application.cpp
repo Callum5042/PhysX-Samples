@@ -3,6 +3,19 @@
 #include <string>
 #include <SDL.h>
 #include <iostream>
+constexpr auto PVD_HOST = "127.0.0.1";
+
+// Collision callback
+class SimulationCallback : public physx::PxSimulationEventCallback
+{
+public:
+    virtual void onConstraintBreak(physx::PxConstraintInfo* constraints, physx::PxU32 count) override {}
+    virtual void onWake(physx::PxActor** actors, physx::PxU32 count) override {}
+    virtual void onSleep(physx::PxActor** actors, physx::PxU32 count) override {}
+    virtual void onContact(const physx::PxContactPairHeader& pairHeader, const physx::PxContactPair* pairs, physx::PxU32 nbPairs) override {}
+    virtual void onTrigger(physx::PxTriggerPair* pairs, physx::PxU32 count) override {}
+    virtual void onAdvance(const physx::PxRigidBody* const* bodyBuffer, const physx::PxTransform* poseBuffer, const physx::PxU32 count) override {}
+};
 
 Applicataion::~Applicataion()
 {
@@ -40,6 +53,26 @@ int Applicataion::Execute()
     SDL_GetWindowSize(m_SdlWindow, &window_width, &window_height);
 
     m_DxCamera = std::make_unique<DX::Camera>(window_width, window_height);
+
+    // Physics
+    // Create foundation
+    m_Foundation = PxCreateFoundation(PX_PHYSICS_VERSION, m_DefaultAllocatorCallback, m_DefaultErrorCallback);
+    if (m_Foundation == nullptr)
+    {
+        throw std::exception("PxCreateFoundation failed!");
+    }
+
+    // Create PVD client
+    m_Pvd = PxCreatePvd(*m_Foundation);
+    m_Transport = physx::PxDefaultPvdSocketTransportCreate(PVD_HOST, 5425, 10);
+    m_Pvd->connect(*m_Transport, physx::PxPvdInstrumentationFlag::eALL);
+
+    // Create physics
+    m_Physics = PxCreatePhysics(PX_PHYSICS_VERSION, *m_Foundation, physx::PxTolerancesScale(), true, m_Pvd);
+    if (m_Physics == nullptr)
+    {
+        throw std::exception("PxCreatePhysics failed!");
+    }
 
     // Starts the timer
     m_Timer.Start();
