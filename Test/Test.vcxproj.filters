@@ -30,7 +30,7 @@
     <ClCompile Include="DxRenderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="DxModel.cpp">
+    <ClCompile Include="DynamicModel.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="DxShader.cpp">
@@ -42,7 +42,7 @@
     <ClCompile Include="GeometryGenerator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="DxFloor.cpp">
+    <ClCompile Include="PlaneModel.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Physics.cpp">
@@ -59,7 +59,7 @@
     <ClInclude Include="DxRenderer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="DxModel.h">
+    <ClInclude Include="DynamicModel.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="DxShader.h">
@@ -74,7 +74,7 @@
     <ClInclude Include="Vertex.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="DxFloor.h">
+    <ClInclude Include="PlaneModel.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Physics.h">

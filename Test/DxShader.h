@@ -2,7 +2,7 @@
 
 #include "DxRenderer.h"
 #include <DirectXMath.h>
-#include "DxModel.h"
+#include "DynamicModel.h"
 #include <string>
 
 namespace DX

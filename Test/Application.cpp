@@ -18,11 +18,11 @@ int Applicataion::Execute()
     m_Physics->Setup();
 
     // Create models
-    m_DxModel = std::make_unique<DX::Model>(m_DxRenderer.get(), m_Physics.get());
-    m_DxModel->Create(0.0f, 5.0f, 0.0f);
+    m_DynamicModel = std::make_unique<DX::DynamicModel>(m_DxRenderer.get(), m_Physics.get());
+    m_DynamicModel->Create(0.0f, 5.0f, 0.0f);
 
-    m_DxFloor = std::make_unique<DX::Floor>(m_DxRenderer.get(), m_Physics.get());
-    m_DxFloor->Create();
+    m_PlaneModel = std::make_unique<DX::PlaneModel>(m_DxRenderer.get(), m_Physics.get());
+    m_PlaneModel->Create();
 
     // Starts the timer
     m_Timer.Start();
@@ -81,13 +81,13 @@ int Applicataion::Execute()
             m_DxShader->Use();
 
             // Render the model
-            m_DxModel->Update();
-            m_DxShader->UpdateWorldBuffer(m_DxModel->World, m_DxModel->Colour);
-            m_DxModel->Render();
+            m_DynamicModel->Update();
+            m_DxShader->UpdateWorldBuffer(m_DynamicModel->World, m_DynamicModel->Colour);
+            m_DynamicModel->Render();
 
             // Render the floor
-            m_DxShader->UpdateWorldBuffer(m_DxFloor->World, m_DxFloor->Colour);
-            m_DxFloor->Render();
+            m_DxShader->UpdateWorldBuffer(m_PlaneModel->World, m_PlaneModel->Colour);
+            m_PlaneModel->Render();
 
             // Display the rendered scene
             m_DxRenderer->Present();
