@@ -13,6 +13,12 @@ constexpr auto PVD_HOST = "127.0.0.1";
 //    virtual void onAdvance(const physx::PxRigidBody* const* bodyBuffer, const physx::PxTransform* poseBuffer, const physx::PxU32 count) override {}
 //};
 
+PX::Physics::~Physics()
+{
+    if (m_Physics != nullptr) m_Physics->release();
+    if (m_Foundation != nullptr) m_Foundation->release();
+}
+
 void PX::Physics::Setup()
 {
     CreateFoundationAndPhysics();

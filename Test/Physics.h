@@ -18,7 +18,7 @@ namespace PX
 	{
 	public:
 		Physics() = default;
-		virtual ~Physics() = default;
+		virtual ~Physics();
 
 		void Setup();
 		void Simulate(double delta_time);
