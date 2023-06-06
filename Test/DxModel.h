@@ -15,6 +15,7 @@ namespace DX
 
 		// Create device
 		void Create(float x, float y, float z);
+		void Create(float x, float y, float z, float width, float height, float depth);
 
 		// Render the model
 		void Render();
@@ -31,7 +32,8 @@ namespace DX
 	private:
 		DX::Renderer* m_DxRenderer = nullptr;
 
-		DirectX::XMFLOAT3 m_Position;
+		DirectX::XMFLOAT3 m_Position = DirectX::XMFLOAT3(0, 0, 0);
+		DirectX::XMFLOAT3 m_Dimensions = DirectX::XMFLOAT3(1.0f, 1.0f, 1.0f);
 
 		// Vertex buffer
 		ComPtr<ID3D11Buffer> m_d3dVertexBuffer = nullptr;

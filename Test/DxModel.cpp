@@ -8,11 +8,15 @@ DX::Model::Model(DX::Renderer* renderer, PX::Physics* physics) : m_DxRenderer(re
 
 void DX::Model::Create(float x, float y, float z)
 {
-	m_Position.x = x;
-	m_Position.y = y;
-	m_Position.z = z;
+	Create(x, y, z, 1.0f, 1.0f, 1.0f);
+}
 
-	GeometryGenerator::CreateBox(1.0f, 1.0f, 1.0f, &m_MeshData);
+void DX::Model::Create(float x, float y, float z, float width, float height, float depth)
+{
+	m_Position = DirectX::XMFLOAT3(x, y, z);
+	m_Dimensions = DirectX::XMFLOAT3(width, height, depth);
+
+	GeometryGenerator::CreateBox(width, height, depth, &m_MeshData);
 
 	// Create input buffers
 	CreateVertexBuffer();
@@ -21,8 +25,7 @@ void DX::Model::Create(float x, float y, float z)
 	// Create dynamic object
 	CreatePhysicsActor();
 
-	World = DirectX::XMMatrixIdentity();
-	World = DirectX::XMMatrixTranslation(x, y, z);
+	World *= DirectX::XMMatrixTranslation(x, y, z);
 }
 
 void DX::Model::CreateVertexBuffer()
@@ -60,7 +63,7 @@ void DX::Model::CreateIndexBuffer()
 void DX::Model::CreatePhysicsActor()
 {
 	physx::PxMaterial* material = m_Physics->GetPhysics()->createMaterial(0.4f, 0.4f, 0.4f);
-	physx::PxShape* shape = m_Physics->GetPhysics()->createShape(physx::PxBoxGeometry(1.0f, 1.0f, 1.0f), *material);
+	physx::PxShape* shape = m_Physics->GetPhysics()->createShape(physx::PxBoxGeometry(m_Dimensions.x, m_Dimensions.y, m_Dimensions.z), *material);
 
 	// Set position
 	physx::PxVec3 position = physx::PxVec3(physx::PxReal(m_Position.x), physx::PxReal(m_Position.y), physx::PxReal(m_Position.z));
