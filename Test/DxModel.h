@@ -3,14 +3,14 @@
 #include "DxRenderer.h"
 #include <DirectXMath.h>
 #include "Vertex.h"
-#include "PxPhysicsAPI.h"
+#include "Physics.h"
 
 namespace DX
 {
 	class Model
 	{
 	public:
-		Model(DX::Renderer* renderer, physx::PxPhysics* physics, physx::PxScene* scene);
+		Model(DX::Renderer* renderer, PX::Physics* physics);
 		virtual ~Model() = default;
 
 		// Create device
@@ -19,6 +19,7 @@ namespace DX
 		// Render the model
 		void Render();
 
+		// Update model
 		void Update();
 
 		// World 
@@ -29,6 +30,8 @@ namespace DX
 
 	private:
 		DX::Renderer* m_DxRenderer = nullptr;
+
+		DirectX::XMFLOAT3 m_Position;
 
 		// Vertex buffer
 		ComPtr<ID3D11Buffer> m_d3dVertexBuffer = nullptr;
@@ -42,8 +45,8 @@ namespace DX
 		MeshData m_MeshData;
 
 		// Physics
-		physx::PxPhysics* m_Physics = nullptr;
-		physx::PxScene* m_Scene = nullptr;
+		PX::Physics* m_Physics = nullptr;
 		physx::PxRigidBody* m_Body = nullptr;
+		void CreatePhysicsActor();
 	};
 }

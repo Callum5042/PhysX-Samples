@@ -2,30 +2,24 @@
 #include <DirectXMath.h>
 #include "GeometryGenerator.h"
 
-DX::Model::Model(DX::Renderer* renderer, physx::PxPhysics* physics, physx::PxScene* scene) : m_DxRenderer(renderer), m_Physics(physics), m_Scene(scene)
+DX::Model::Model(DX::Renderer* renderer, PX::Physics* physics) : m_DxRenderer(renderer), m_Physics(physics)
 {
 }
 
 void DX::Model::Create(float x, float y, float z)
 {
+	m_Position.x = x;
+	m_Position.y = y;
+	m_Position.z = z;
+
 	GeometryGenerator::CreateBox(1.0f, 1.0f, 1.0f, &m_MeshData);
 
 	// Create input buffers
 	CreateVertexBuffer();
 	CreateIndexBuffer();
 
-	// Create dynamic objects
-	auto material = m_Physics->createMaterial(0.4f, 0.4f, 0.4f);
-	auto shape = m_Physics->createShape(physx::PxBoxGeometry(1.0f, 1.0f, 1.0f), *material);
-
-	// Set position
-	physx::PxVec3 position = physx::PxVec3(physx::PxReal(x), physx::PxReal(y), physx::PxReal(z));
-	physx::PxTransform transform(position);
-
-	m_Body = m_Physics->createRigidDynamic(transform);
-	m_Body->attachShape(*shape);
-	physx::PxRigidBodyExt::updateMassAndInertia(*m_Body, 100.0f);
-	m_Scene->addActor(*m_Body);
+	// Create dynamic object
+	CreatePhysicsActor();
 
 	World = DirectX::XMMatrixIdentity();
 	World = DirectX::XMMatrixTranslation(x, y, z);
@@ -63,6 +57,21 @@ void DX::Model::CreateIndexBuffer()
 	DX::Check(d3dDevice->CreateBuffer(&index_buffer_desc, &index_subdata, m_d3dIndexBuffer.ReleaseAndGetAddressOf()));
 }
 
+void DX::Model::CreatePhysicsActor()
+{
+	physx::PxMaterial* material = m_Physics->GetPhysics()->createMaterial(0.4f, 0.4f, 0.4f);
+	physx::PxShape* shape = m_Physics->GetPhysics()->createShape(physx::PxBoxGeometry(1.0f, 1.0f, 1.0f), *material);
+
+	// Set position
+	physx::PxVec3 position = physx::PxVec3(physx::PxReal(m_Position.x), physx::PxReal(m_Position.y), physx::PxReal(m_Position.z));
+	physx::PxTransform transform(position);
+
+	m_Body = m_Physics->GetPhysics()->createRigidDynamic(transform);
+	m_Body->attachShape(*shape);
+	physx::PxRigidBodyExt::updateMassAndInertia(*m_Body, 100.0f);
+	m_Physics->GetScene()->addActor(*m_Body);
+}
+
 void DX::Model::Render()
 {
 	auto d3dDeviceContext = m_DxRenderer->GetDeviceContext();
@@ -87,9 +96,12 @@ void DX::Model::Render()
 void DX::Model::Update()
 {
 	physx::PxTransform global_pose = m_Body->getGlobalPose();
+	m_Position.x = global_pose.p.x;
+	m_Position.y = global_pose.p.y;
+	m_Position.z = global_pose.p.z;
 
 	World = DirectX::XMMatrixIdentity();
 	World *= DirectX::XMMatrixRotationQuaternion(DirectX::XMVectorSet(global_pose.q.x, global_pose.q.y, global_pose.q.z, global_pose.q.w));
-	World *= DirectX::XMMatrixTranslation(global_pose.p.x, global_pose.p.y, global_pose.p.z);
+	World *= DirectX::XMMatrixTranslation(m_Position.x, m_Position.y, m_Position.z);
 }
  

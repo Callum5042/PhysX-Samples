@@ -12,17 +12,7 @@
 #include "DxFloor.h"
 #include "DxDirectionalLight.h"
 
-#include "PxPhysicsAPI.h"
-
-// PhysX error logger
-class UserErrorCallback : public physx::PxErrorCallback
-{
-public:
-	virtual void reportError(physx::PxErrorCode::Enum code, const char* message, const char* file, int line)
-	{
-		std::cout << "Error: " << code << " - " << message << '\n';
-	}
-};
+#include "Physics.h"
 
 class Applicataion
 {
@@ -33,6 +23,8 @@ public:
 	int Execute();
 
 private:
+	void DirectXSetup();
+
 	// SDL window
 	bool SDLInit();
 	void SDLCleanup();
@@ -64,13 +56,5 @@ private:
 	// Move directional light
 	void MoveDirectionalLight();
 
-
-
-	physx::PxPhysics* m_Physics = nullptr;
-	physx::PxPvd* m_Pvd = nullptr;
-	physx::PxPvdTransport* m_Transport = nullptr;
-	physx::PxFoundation* m_Foundation = nullptr;
-
-	UserErrorCallback m_DefaultErrorCallback;
-	physx::PxDefaultAllocator m_DefaultAllocatorCallback;
+	std::unique_ptr<PX::Physics> m_Physics = nullptr;
 };

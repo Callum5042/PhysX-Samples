@@ -3,19 +3,6 @@
 #include <string>
 #include <SDL.h>
 #include <iostream>
-constexpr auto PVD_HOST = "127.0.0.1";
-
-// Collision callback
-class SimulationCallback : public physx::PxSimulationEventCallback
-{
-public:
-    virtual void onConstraintBreak(physx::PxConstraintInfo* constraints, physx::PxU32 count) override {}
-    virtual void onWake(physx::PxActor** actors, physx::PxU32 count) override {}
-    virtual void onSleep(physx::PxActor** actors, physx::PxU32 count) override {}
-    virtual void onContact(const physx::PxContactPairHeader& pairHeader, const physx::PxContactPair* pairs, physx::PxU32 nbPairs) override {}
-    virtual void onTrigger(physx::PxTriggerPair* pairs, physx::PxU32 count) override {}
-    virtual void onAdvance(const physx::PxRigidBody* const* bodyBuffer, const physx::PxTransform* poseBuffer, const physx::PxU32 count) override {}
-};
 
 Applicataion::~Applicataion()
 {
@@ -24,66 +11,18 @@ Applicataion::~Applicataion()
 
 int Applicataion::Execute()
 {
-    // Physics
-    m_Foundation = PxCreateFoundation(PX_PHYSICS_VERSION, m_DefaultAllocatorCallback, m_DefaultErrorCallback);
-    if (m_Foundation == nullptr)
-    {
-        throw std::exception("PxCreateFoundation failed!");
-    }
-
-    // Create PVD client
-    m_Pvd = PxCreatePvd(*m_Foundation);
-    m_Transport = physx::PxDefaultPvdSocketTransportCreate(PVD_HOST, 5425, 10);
-    m_Pvd->connect(*m_Transport, physx::PxPvdInstrumentationFlag::eALL);
+    DirectXSetup();
 
     // Create physics
-    m_Physics = PxCreatePhysics(PX_PHYSICS_VERSION, *m_Foundation, physx::PxTolerancesScale(), true, m_Pvd);
-    if (m_Physics == nullptr)
-    {
-        throw std::exception("PxCreatePhysics failed!");
-    }
+    m_Physics = std::make_unique<PX::Physics>();
+    m_Physics->Setup();
 
-    // Create CPU dispatcher
-    auto m_Dispatcher = physx::PxDefaultCpuDispatcherCreate(2);
+    // Create models
+    m_DxModel = std::make_unique<DX::Model>(m_DxRenderer.get(), m_Physics.get());
+    m_DxModel->Create(0.0f, 5.0f, 0.0f);
 
-    // Create scene
-    physx::PxSceneDesc scene_desc(m_Physics->getTolerancesScale());
-    scene_desc.gravity = physx::PxVec3(0.0f, -9.81f, 0.0f);
-    scene_desc.cpuDispatcher = m_Dispatcher;
-    scene_desc.filterShader = physx::PxDefaultSimulationFilterShader;
-    // scene_desc.simulationEventCallback = this;
-
-    physx::PxScene* m_Scene = m_Physics->createScene(scene_desc);
-
-    // Initialise SDL subsystems and creates the window
-    if (!SDLInit())
-        return -1;
-
-    // Initialise and create the DirectX 11 renderer
-    m_DxRenderer = std::make_unique<DX::Renderer>(m_SdlWindow);
-    m_DxRenderer->Create();
-
-    // Initialise and create the DirectX 11 model
-    m_DxModel = std::make_unique<DX::Model>(m_DxRenderer.get(), m_Physics, m_Scene);
-    m_DxModel->Create(0.0f, 10.0f, 0.0f);
-
-    m_DxFloor = std::make_unique<DX::Floor>(m_DxRenderer.get(), m_Physics, m_Scene);
+    m_DxFloor = std::make_unique<DX::Floor>(m_DxRenderer.get(), m_Physics.get());
     m_DxFloor->Create();
-
-    m_DxDirectionalLight = std::make_unique<DX::DirectionalLight>(m_DxRenderer.get());
-    m_DxDirectionalLight->Create();
-
-    // Initialise and create the DirectX 11 shader
-    m_DxShader = std::make_unique<DX::Shader>(m_DxRenderer.get());
-    m_DxShader->LoadVertexShader("Shaders/VertexShader.cso");
-    m_DxShader->LoadPixelShader("Shaders/PixelShader.cso");
-
-    // Initialise and setup the perspective camera
-    auto window_width = 0;
-    auto window_height = 0;
-    SDL_GetWindowSize(m_SdlWindow, &window_width, &window_height);
-
-    m_DxCamera = std::make_unique<DX::Camera>(window_width, window_height);
 
     // Starts the timer
     m_Timer.Start();
@@ -135,8 +74,7 @@ int Applicataion::Execute()
 
             MoveDirectionalLight();
 
-            m_Scene->simulate(static_cast<physx::PxReal>(m_Timer.DeltaTime()));
-            m_Scene->fetchResults(true);
+            m_Physics->Simulate(m_Timer.DeltaTime());
 
             // Clear the buffers
             m_DxRenderer->Clear();
@@ -159,6 +97,34 @@ int Applicataion::Execute()
     }
 
     return 0;
+}
+
+void Applicataion::DirectXSetup()
+{
+    // Initialise SDL subsystems and creates the window
+    if (!SDLInit())
+        throw std::exception("SDLInit failed");
+
+    // Initialise and create the DirectX 11 renderer
+    m_DxRenderer = std::make_unique<DX::Renderer>(m_SdlWindow);
+    m_DxRenderer->Create();
+
+    // Setup lights
+    m_DxDirectionalLight = std::make_unique<DX::DirectionalLight>(m_DxRenderer.get());
+    m_DxDirectionalLight->Create();
+
+    // Initialise and create the DirectX 11 shader
+    m_DxShader = std::make_unique<DX::Shader>(m_DxRenderer.get());
+    m_DxShader->LoadVertexShader("Shaders/VertexShader.cso");
+    m_DxShader->LoadPixelShader("Shaders/PixelShader.cso");
+
+    // Initialise and setup the perspective camera
+    auto window_width = 0;
+    auto window_height = 0;
+    SDL_GetWindowSize(m_SdlWindow, &window_width, &window_height);
+
+    // Setup camera
+    m_DxCamera = std::make_unique<DX::Camera>(window_width, window_height);
 }
 
 void Applicataion::MoveDirectionalLight()
