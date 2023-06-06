@@ -72,8 +72,6 @@ int Applicataion::Execute()
             m_Timer.Tick();
             CalculateFramesPerSecond();
 
-            MoveDirectionalLight();
-
             m_Physics->Simulate(m_Timer.DeltaTime());
 
             // Clear the buffers
@@ -109,10 +107,6 @@ void Applicataion::DirectXSetup()
     m_DxRenderer = std::make_unique<DX::Renderer>(m_SdlWindow);
     m_DxRenderer->Create();
 
-    // Setup lights
-    m_DxDirectionalLight = std::make_unique<DX::DirectionalLight>(m_DxRenderer.get());
-    m_DxDirectionalLight->Create();
-
     // Initialise and create the DirectX 11 shader
     m_DxShader = std::make_unique<DX::Shader>(m_DxRenderer.get());
     m_DxShader->LoadVertexShader("Shaders/VertexShader.cso");
@@ -125,17 +119,21 @@ void Applicataion::DirectXSetup()
 
     // Setup camera
     m_DxCamera = std::make_unique<DX::Camera>(window_width, window_height);
+
+    SetupDirectionalLight();
 }
 
-void Applicataion::MoveDirectionalLight()
+void Applicataion::SetupDirectionalLight()
 {
     float delta_time = static_cast<float>(m_Timer.DeltaTime());
+
+    DirectX::XMMATRIX world = DirectX::XMMatrixTranslation(5.0f, 4.0f, -6.0f);
 
     // Decompose matrix for position
     DirectX::XMVECTOR scale;
     DirectX::XMVECTOR rotation;
     DirectX::XMVECTOR position;
-    DirectX::XMMatrixDecompose(&scale, &rotation, &position, m_DxDirectionalLight->World);
+    DirectX::XMMatrixDecompose(&scale, &rotation, &position, world);
 
     // Calculate direction (direction looking at the center of the scene)
     DirectX::XMVECTOR center = DirectX::XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f);
