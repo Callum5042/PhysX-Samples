@@ -62,6 +62,7 @@ void DX::Shader::Use()
 
 	// Bind the light constant buffer to pixel shader
 	d3dDeviceContext->PSSetConstantBuffers(0, 1, m_d3dCameraConstantBuffer.GetAddressOf());
+	d3dDeviceContext->PSSetConstantBuffers(1, 1, m_d3dWorldConstantBuffer.GetAddressOf());
 	d3dDeviceContext->PSSetConstantBuffers(2, 1, m_d3dDirectionalLightConstantBuffer.GetAddressOf());
 }
 
@@ -71,13 +72,14 @@ void DX::Shader::UpdateCameraBuffer(const CameraBuffer& buffer)
 	d3dDeviceContext->UpdateSubresource(m_d3dCameraConstantBuffer.Get(), 0, nullptr, &buffer, 0, 0);
 }
 
-void DX::Shader::UpdateWorldBuffer(const DirectX::XMMATRIX& world)
+void DX::Shader::UpdateWorldBuffer(const DirectX::XMMATRIX& world, const DirectX::XMFLOAT4& colour)
 {
 	auto d3dDeviceContext = m_DxRenderer->GetDeviceContext();
 
 	DX::WorldBuffer buffer = {};
 	buffer.world = DirectX::XMMatrixTranspose(world);
 	buffer.worldInverse = DirectX::XMMatrixTranspose(DirectX::XMMatrixInverse(nullptr, world));
+	buffer.colour = colour;
 
 	// We use Map/Unmap here over UpdateSubresource for performance
 	D3D11_MAPPED_SUBRESOURCE resource = {};

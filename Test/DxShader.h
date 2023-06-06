@@ -19,6 +19,7 @@ namespace DX
 	{
 		DirectX::XMMATRIX world;
 		DirectX::XMMATRIX worldInverse;
+		DirectX::XMFLOAT4 colour;
 	};
 
 	struct DirectionalLightBuffer
@@ -45,7 +46,7 @@ namespace DX
 		void UpdateCameraBuffer(const CameraBuffer& buffer);
 
 		// Set world constant buffer from camera
-		void UpdateWorldBuffer(const DirectX::XMMATRIX& world);
+		void UpdateWorldBuffer(const DirectX::XMMATRIX& world, const DirectX::XMFLOAT4& colour);
 
 		// Update camera buffer
 		void UpdateDirectionalLightBuffer(const DirectionalLightBuffer& buffer);

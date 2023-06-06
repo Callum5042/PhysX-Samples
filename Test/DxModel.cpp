@@ -4,6 +4,7 @@
 
 DX::Model::Model(DX::Renderer* renderer, PX::Physics* physics) : m_DxRenderer(renderer), m_Physics(physics)
 {
+	Colour = DirectX::XMFLOAT4(1.0f, 0.0, 0.0f, 1.0f);
 }
 
 void DX::Model::Create(float x, float y, float z)

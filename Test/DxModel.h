@@ -26,6 +26,9 @@ namespace DX
 		// World 
 		DirectX::XMMATRIX World = DirectX::XMMatrixIdentity();
 
+		// Colour
+		DirectX::XMFLOAT4 Colour = DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+
 		// Get actor
 		inline physx::PxRigidBody* GetBody() { return m_Body; }
 

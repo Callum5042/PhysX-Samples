@@ -84,11 +84,11 @@ int Applicataion::Execute()
 
             // Render the model
             m_DxModel->Update();
-            m_DxShader->UpdateWorldBuffer(m_DxModel->World);
+            m_DxShader->UpdateWorldBuffer(m_DxModel->World, m_DxModel->Colour);
             m_DxModel->Render();
 
             // Render the floor
-            m_DxShader->UpdateWorldBuffer(m_DxFloor->World);
+            m_DxShader->UpdateWorldBuffer(m_DxFloor->World, m_DxFloor->Colour);
             m_DxFloor->Render();
 
             // Display the rendered scene

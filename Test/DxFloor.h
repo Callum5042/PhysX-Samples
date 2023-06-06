@@ -21,6 +21,9 @@ namespace DX
 
 		// World 
 		DirectX::XMMATRIX World = DirectX::XMMatrixIdentity();
+		
+		// Colour
+		DirectX::XMFLOAT4 Colour = DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 
 	private:
 		DX::Renderer* m_DxRenderer = nullptr;
