@@ -24,7 +24,7 @@ void PX::Physics::Setup()
     CreateFoundationAndPhysics();
     CreateScene();
 
-    m_Scene->setVisualizationParameter(physx::PxVisualizationParameter::eSCALE, 100.0f);
+    m_Scene->setVisualizationParameter(physx::PxVisualizationParameter::eSCALE, 1.0f);
     m_Scene->setVisualizationParameter(physx::PxVisualizationParameter::eACTOR_AXES, 2.0f);
     m_Scene->setVisualizationParameter(physx::PxVisualizationParameter::eCOLLISION_SHAPES, 1.0f);
 }

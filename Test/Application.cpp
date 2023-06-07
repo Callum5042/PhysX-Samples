@@ -1,23 +1,10 @@
 #include "Application.h"
+#include "DxLineManager.h"
 
 #include <string>
 #include <iostream>
 #include <vector>
 #include <SDL.h>
-
-struct LineVertex
-{
-    // Position
-    float x = 0;
-    float y = 0;
-    float z = 0;
-
-    // Colour
-    float r = 0;
-    float g = 0;
-    float b = 0;
-    float a = 0;
-};
 
 Applicataion::~Applicataion()
 {
@@ -28,47 +15,9 @@ int Applicataion::Execute()
 {
     DirectXSetup();
 
-    /////////// Line stuff
-    ComPtr<ID3D11Buffer> m_LineVertexBuffer = nullptr;
-    // void CreateVisualisationLineBuffer();
-    std::vector<LineVertex> m_LineList;
-
-    // Create vertex buffer
-    D3D11_BUFFER_DESC vertexbuffer_desc = {};
-    vertexbuffer_desc.Usage = D3D11_USAGE_DYNAMIC;
-    vertexbuffer_desc.ByteWidth = static_cast<UINT>(sizeof(LineVertex) * 1000000);
-    vertexbuffer_desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-    vertexbuffer_desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-
-    m_DxRenderer->GetDevice()->CreateBuffer(&vertexbuffer_desc, nullptr, m_LineVertexBuffer.ReleaseAndGetAddressOf());
-
-    {
-        LineVertex v1;
-        v1.x = -10.0f;
-        v1.y = 3.0f;
-        v1.z = 0.0f;
-
-        v1.r = 1;
-        v1.g = 0;
-        v1.b = 0;
-        v1.a = 1;
-
-        LineVertex v2;
-        v2.x = 10.0f;
-        v2.y = 3.0f;
-        v2.z = 0.0f;
-
-        v2.r = 1;
-        v2.g = 0;
-        v2.b = 0;
-        v2.a = 1;
-
-        m_LineList.push_back(v1);
-        m_LineList.push_back(v2);
-    }
-
-    ////////////
-
+    // Lines
+    std::unique_ptr<DX::LineManager> line_manager = std::make_unique<DX::LineManager>(m_DxRenderer.get());
+    line_manager->Create();
 
     // Create physics
     m_Physics = std::make_unique<PX::Physics>();
@@ -147,59 +96,9 @@ int Applicataion::Execute()
             m_PlaneModel->Render();
 
             // Render lines
-            // 
-            // Populate lines
-            std::vector<LineVertex> vertices;
-            const physx::PxRenderBuffer& rb = m_Physics->GetScene()->getRenderBuffer();
-            for (physx::PxU32 i = 0; i < rb.getNbLines(); i++)
-            {
-                const physx::PxDebugLine& line = rb.getLines()[i];
+            line_manager->AddSceneLine(m_Physics.get());
 
-                LineVertex v1;
-                v1.x = line.pos0.x;
-                v1.y = line.pos0.y;
-                v1.z = line.pos0.z;
-
-                v1.r = static_cast<float>(line.color0 & 0x000000ff);
-                v1.g = static_cast<float>((line.color0 & 0x0000ff00) >> 8);
-                v1.b = static_cast<float>((line.color0 & 0x00ff0000) >> 16);
-                v1.a = static_cast<float>((line.color0 & 0xff000000) >> 24);
-
-                LineVertex v2;
-                v2.x = line.pos1.x;
-                v2.y = line.pos1.y;
-                v2.z = line.pos1.z;
-
-                v2.r = static_cast<float>(line.color1 & 0x000000ff);
-                v2.g = static_cast<float>((line.color1 & 0x0000ff00) >> 8);
-                v2.b = static_cast<float>((line.color1 & 0x00ff0000) >> 16);
-                v2.a = static_cast<float>((line.color1 & 0xff000000) >> 24);
-
-                vertices.push_back(v1);
-                vertices.push_back(v2);
-            }
-
-            m_LineList.clear();
-            m_LineList.insert(m_LineList.end(), vertices.begin(), vertices.end());
-
-            // Map new resource
-            D3D11_MAPPED_SUBRESOURCE resource = {};
-            int memorysize = sizeof(LineVertex) * static_cast<int>(m_LineList.size());
-
-            DX::Check(m_DxRenderer->GetDeviceContext()->Map(m_LineVertexBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &resource));
-            std::memcpy(resource.pData, m_LineList.data(), memorysize);
-            m_DxRenderer->GetDeviceContext()->Unmap(m_LineVertexBuffer.Get(), 0);
-
-            // Bind the vertex buffer
-            UINT stride = sizeof(LineVertex);
-            UINT offset = 0;
-
-            // Bind the vertex buffer to the pipeline's Input Assembler stage
-            m_DxRenderer->GetDeviceContext()->IASetVertexBuffers(0, 1, m_LineVertexBuffer.GetAddressOf(), &stride, &offset);
-
-            // Bind the geometry topology to the pipeline's Input Assembler stage
-            m_DxRenderer->GetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
-
+            // Camera shader
             DX::CameraBuffer camera_buffer = {};
             camera_buffer.view = DirectX::XMMatrixTranspose(m_DxCamera->GetView());
             camera_buffer.projection = DirectX::XMMatrixTranspose(m_DxCamera->GetProjection());
@@ -210,8 +109,8 @@ int Applicataion::Execute()
             m_DxLineShader->UpdateCamera(camera_buffer);
             m_DxLineShader->UpdateModel(DirectX::XMMatrixIdentity());
 
-            // Render
-            m_DxRenderer->GetDeviceContext()->Draw(static_cast<UINT>(m_LineList.size()), 0);
+            line_manager->Render();
+            line_manager->ClearLines();
 
             // Display the rendered scene
             m_DxRenderer->Present();

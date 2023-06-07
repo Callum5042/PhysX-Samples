@@ -54,6 +54,9 @@
     <ClCompile Include="DxLineShader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="DxLineManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application.h">
@@ -90,6 +93,9 @@
       <Filter>Shader Files\LineShader</Filter>
     </ClInclude>
     <ClInclude Include="DxLineShader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DxLineManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
