@@ -98,15 +98,8 @@ int Applicataion::Execute()
             // Render lines
             line_manager->AddSceneLine(m_Physics.get());
 
-            // Camera shader
-            DX::CameraBuffer camera_buffer = {};
-            camera_buffer.view = DirectX::XMMatrixTranspose(m_DxCamera->GetView());
-            camera_buffer.projection = DirectX::XMMatrixTranspose(m_DxCamera->GetProjection());
-            camera_buffer.cameraPosition = m_DxCamera->GetPosition();
-
             // Apply shader
             m_DxLineShader->Use();
-            m_DxLineShader->UpdateCamera(camera_buffer);
             m_DxLineShader->UpdateModel(DirectX::XMMatrixIdentity());
 
             line_manager->Render();
@@ -180,6 +173,7 @@ void Applicataion::SetCameraBuffer()
     buffer.cameraPosition = m_DxCamera->GetPosition();
 
     m_DxShader->UpdateCameraBuffer(buffer);
+    m_DxLineShader->UpdateCamera(buffer);
 }
 
 bool Applicataion::SDLInit()
