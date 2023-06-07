@@ -163,6 +163,7 @@
     </Link>
     <PostBuildEvent>
       <Command>xcopy /e /v /i /y "$(SolutionDir)External\SDL2\Lib\$(Platform)\SDL2.dll" "$(SolutionDir)bin\$(ProjectName)\$(Configuration)-$(Platform)\" &gt; nul
+xcopy /e /v /i /y "$(SolutionDir)External\PhysX\Lib\$(Configuration)\*.dll" "$(SolutionDir)bin\$(ProjectName)\$(Configuration)-$(Platform)\" &gt; nul
 
 </Command>
     </PostBuildEvent>

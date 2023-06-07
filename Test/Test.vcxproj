@@ -163,8 +163,7 @@
     </Link>
     <PostBuildEvent>
       <Command>xcopy /e /v /i /y "$(SolutionDir)External\SDL2\Lib\$(Platform)\SDL2.dll" "$(SolutionDir)bin\$(ProjectName)\$(Configuration)-$(Platform)\" &gt; nul
-
-</Command>
+xcopy /e /v /i /y "$(SolutionDir)External\PhysX\Lib\$(Configuration)\*.dll" "$(SolutionDir)bin\$(ProjectName)\$(Configuration)-$(Platform)\" &gt; nul</Command>
     </PostBuildEvent>
     <FxCompile>
       <ShaderModel>5.0</ShaderModel>
