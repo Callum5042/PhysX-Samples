@@ -6,6 +6,7 @@
 #include "Timer.h"
 #include "DxRenderer.h"
 #include "DxShader.h"
+#include "DxLineShader.h"
 #include "DxCamera.h"
 
 #include "DynamicModel.h"
@@ -42,6 +43,7 @@ private:
 
 	// Direct3D 11 shader
 	std::unique_ptr<DX::Shader> m_DxShader = nullptr;
+	std::unique_ptr<DX::LineShader> m_DxLineShader = nullptr;
 
 	// Direct3D 11 perspective camera
 	std::unique_ptr<DX::Camera> m_DxCamera = nullptr;
