@@ -10,6 +10,8 @@
 #include "DxCamera.h"
 
 #include "DynamicModel.h"
+#include "KinematicModel.h"
+#include "CharacterKinematicModel.h"
 #include "PlaneModel.h"
 
 #include "Physics.h"
@@ -40,6 +42,8 @@ private:
 	// Direct3D 11 model
 	std::unique_ptr<DX::DynamicModel> m_DynamicModel = nullptr;
 	std::unique_ptr<DX::PlaneModel> m_PlaneModel = nullptr;
+	std::unique_ptr<DX::KinematicModel> m_KinematicModel = nullptr;
+	std::unique_ptr<DX::CharacterKinematicModel> m_CharacterKinematicModel = nullptr;
 
 	// Direct3D 11 shader
 	std::unique_ptr<DX::Shader> m_DxShader = nullptr;

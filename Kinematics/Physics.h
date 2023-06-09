@@ -25,6 +25,7 @@ namespace PX
 
 		inline physx::PxPhysics* GetPhysics() { return m_Physics; }
 		inline physx::PxScene* GetScene() { return m_Scene; }
+		inline physx::PxControllerManager* GetControllerManager() { return m_ControllerManager; }
 
 	private:
 		// Setup
@@ -40,5 +41,8 @@ namespace PX
 		// Scene
 		physx::PxScene* m_Scene = nullptr;
 		void CreateScene();
+
+		// Controller Kinematics
+		physx::PxControllerManager* m_ControllerManager = nullptr;
 	};
 }

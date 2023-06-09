@@ -24,8 +24,14 @@ int Applicataion::Execute()
     m_Physics->Setup();
 
     // Create models
-    m_DynamicModel = std::make_unique<DX::DynamicModel>(m_DxRenderer.get(), m_Physics.get());
-    m_DynamicModel->Create(0.0f, 5.0f, 0.0f);
+    /*m_DynamicModel = std::make_unique<DX::DynamicModel>(m_DxRenderer.get(), m_Physics.get());
+    m_DynamicModel->Create(0.0f, 5.0f, 0.0f);*/
+    
+    m_KinematicModel = std::make_unique<DX::KinematicModel>(m_DxRenderer.get(), m_Physics.get());
+    m_KinematicModel->Create(0.0f, 1.0f, 0.0f);
+    
+    m_CharacterKinematicModel = std::make_unique<DX::CharacterKinematicModel>(m_DxRenderer.get(), m_Physics.get());
+    m_CharacterKinematicModel->Create(0.0f, 2.0f, 0.0f);
 
     m_PlaneModel = std::make_unique<DX::PlaneModel>(m_DxRenderer.get(), m_Physics.get());
     m_PlaneModel->Create();
@@ -87,9 +93,17 @@ int Applicataion::Execute()
             m_DxShader->Use();
 
             // Render the model
-            m_DynamicModel->Update();
+            /*m_DynamicModel->Update();
             m_DxShader->UpdateWorldBuffer(m_DynamicModel->World, m_DynamicModel->Colour);
-            m_DynamicModel->Render();
+            m_DynamicModel->Render();*/
+
+            m_KinematicModel->Update(static_cast<float>(m_Timer.DeltaTime()));
+            m_DxShader->UpdateWorldBuffer(m_KinematicModel->World, m_KinematicModel->Colour);
+            m_KinematicModel->Render();
+
+            m_CharacterKinematicModel->Update(static_cast<float>(m_Timer.DeltaTime()));
+            m_DxShader->UpdateWorldBuffer(m_CharacterKinematicModel->World, m_CharacterKinematicModel->Colour);
+            m_CharacterKinematicModel->Render();
 
             // Render the floor
             m_DxShader->UpdateWorldBuffer(m_PlaneModel->World, m_PlaneModel->Colour);
@@ -201,7 +215,7 @@ bool Applicataion::SDLInit()
 }
 
 void Applicataion::SDLCleanup()
-{
+{  
     SDL_DestroyWindow(m_SdlWindow);
     SDL_Quit();
 }

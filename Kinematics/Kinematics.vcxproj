@@ -203,9 +203,11 @@ xcopy /e /v /i /y "$(SolutionDir)External\PhysX\Lib\$(Configuration)\*.dll" "$(S
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Application.cpp" />
+    <ClCompile Include="CharacterKinematicModel.cpp" />
     <ClCompile Include="DxCamera.cpp" />
     <ClCompile Include="DxLineManager.cpp" />
     <ClCompile Include="DxLineShader.cpp" />
+    <ClCompile Include="KinematicModel.cpp" />
     <ClCompile Include="PlaneModel.cpp" />
     <ClCompile Include="DynamicModel.cpp" />
     <ClCompile Include="DxShader.cpp" />
@@ -217,10 +219,12 @@ xcopy /e /v /i /y "$(SolutionDir)External\PhysX\Lib\$(Configuration)\*.dll" "$(S
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application.h" />
+    <ClInclude Include="CharacterKinematicModel.h" />
     <ClInclude Include="DxCamera.h" />
     <ClInclude Include="DxLineManager.h" />
     <ClInclude Include="DxLineShader.h" />
     <ClInclude Include="DynamicModel.h" />
+    <ClInclude Include="KinematicModel.h" />
     <ClInclude Include="LineShaderData.hlsli" />
     <ClInclude Include="PlaneModel.h" />
     <ClInclude Include="DxRenderer.h" />

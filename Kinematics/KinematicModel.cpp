@@ -1,18 +1,18 @@
-#include "DynamicModel.h"
+#include "KinematicModel.h"
 #include <DirectXMath.h>
 #include "GeometryGenerator.h"
 
-DX::DynamicModel::DynamicModel(DX::Renderer* renderer, PX::Physics* physics) : m_DxRenderer(renderer), m_Physics(physics)
+DX::KinematicModel::KinematicModel(DX::Renderer* renderer, PX::Physics* physics) : m_DxRenderer(renderer), m_Physics(physics)
 {
-	Colour = DirectX::XMFLOAT4(1.0f, 0.0, 0.0f, 1.0f);
+	Colour = DirectX::XMFLOAT4(0.0f, 1.0, 0.0f, 1.0f);
 }
 
-void DX::DynamicModel::Create(float x, float y, float z)
+void DX::KinematicModel::Create(float x, float y, float z)
 {
-	Create(x, y, z, 1.0f, 1.0f, 1.0f);
+	Create(x, y, z, 2.0f, 0.2f, 2.0f);
 }
 
-void DX::DynamicModel::Create(float x, float y, float z, float width, float height, float depth)
+void DX::KinematicModel::Create(float x, float y, float z, float width, float height, float depth)
 {
 	m_Position = DirectX::XMFLOAT3(x, y, z);
 	m_Dimensions = DirectX::XMFLOAT3(width, height, depth);
@@ -29,7 +29,7 @@ void DX::DynamicModel::Create(float x, float y, float z, float width, float heig
 	World *= DirectX::XMMatrixTranslation(x, y, z);
 }
 
-void DX::DynamicModel::CreateVertexBuffer()
+void DX::KinematicModel::CreateVertexBuffer()
 {
 	auto d3dDevice = m_DxRenderer->GetDevice();
 
@@ -45,7 +45,7 @@ void DX::DynamicModel::CreateVertexBuffer()
 	DX::Check(d3dDevice->CreateBuffer(&vertex_buffer_desc, &vertex_subdata, m_d3dVertexBuffer.ReleaseAndGetAddressOf()));
 }
 
-void DX::DynamicModel::CreateIndexBuffer()
+void DX::KinematicModel::CreateIndexBuffer()
 {
 	auto d3dDevice = m_DxRenderer->GetDevice();
 
@@ -61,9 +61,9 @@ void DX::DynamicModel::CreateIndexBuffer()
 	DX::Check(d3dDevice->CreateBuffer(&index_buffer_desc, &index_subdata, m_d3dIndexBuffer.ReleaseAndGetAddressOf()));
 }
 
-void DX::DynamicModel::CreatePhysicsActor()
+void DX::KinematicModel::CreatePhysicsActor()
 {
-	physx::PxMaterial* material = m_Physics->GetPhysics()->createMaterial(1.0f, 1.0f, 1.0f);
+	physx::PxMaterial* material = m_Physics->GetPhysics()->createMaterial(0.4f, 0.4f, 0.4f);
 	physx::PxShape* shape = m_Physics->GetPhysics()->createShape(physx::PxBoxGeometry(m_Dimensions.x, m_Dimensions.y, m_Dimensions.z), *material);
 
 	// Set position
@@ -72,11 +72,13 @@ void DX::DynamicModel::CreatePhysicsActor()
 
 	m_Body = m_Physics->GetPhysics()->createRigidDynamic(transform);
 	m_Body->attachShape(*shape);
+	m_Body->setRigidBodyFlag(physx::PxRigidBodyFlag::eKINEMATIC, true);
+
 	physx::PxRigidBodyExt::updateMassAndInertia(*m_Body, 100.0f);
 	m_Physics->GetScene()->addActor(*m_Body);
 }
 
-void DX::DynamicModel::Render()
+void DX::KinematicModel::Render()
 {
 	auto d3dDeviceContext = m_DxRenderer->GetDeviceContext();
 
@@ -97,15 +99,18 @@ void DX::DynamicModel::Render()
 	d3dDeviceContext->DrawIndexed(static_cast<UINT>(m_MeshData.indices.size()), 0, 0);
 }
 
-void DX::DynamicModel::Update()
+void DX::KinematicModel::Update(float delta)
 {
-	physx::PxTransform global_pose = m_Body->getGlobalPose();
+	m_Position.x += delta;
+
+	m_Body->setKinematicTarget(physx::PxTransform(physx::PxVec3(m_Position.x, m_Position.y, m_Position.z)));
+
+	/*physx::PxTransform global_pose = m_Body->getGlobalPose();
 	m_Position.x = global_pose.p.x;
 	m_Position.y = global_pose.p.y;
-	m_Position.z = global_pose.p.z;
+	m_Position.z = global_pose.p.z;*/
 
 	World = DirectX::XMMatrixIdentity();
-	World *= DirectX::XMMatrixRotationQuaternion(DirectX::XMVectorSet(global_pose.q.x, global_pose.q.y, global_pose.q.z, global_pose.q.w));
+	//World *= DirectX::XMMatrixRotationQuaternion(DirectX::XMVectorSet(global_pose.q.x, global_pose.q.y, global_pose.q.z, global_pose.q.w));
 	World *= DirectX::XMMatrixTranslation(m_Position.x, m_Position.y, m_Position.z);
 }
- 

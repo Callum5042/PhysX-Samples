@@ -70,4 +70,6 @@ void PX::Physics::CreateScene()
     // scene_desc.simulationEventCallback = this;
 
     m_Scene = m_Physics->createScene(scene_desc);
+
+    m_ControllerManager = PxCreateControllerManager(*m_Scene);
 }
