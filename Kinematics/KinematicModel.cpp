@@ -63,7 +63,7 @@ void DX::KinematicModel::CreateIndexBuffer()
 
 void DX::KinematicModel::CreatePhysicsActor()
 {
-	physx::PxMaterial* material = m_Physics->GetPhysics()->createMaterial(0.4f, 0.4f, 0.4f);
+	physx::PxMaterial* material = m_Physics->GetPhysics()->createMaterial(0.5f, 0.5f, 0.1f);
 	physx::PxShape* shape = m_Physics->GetPhysics()->createShape(physx::PxBoxGeometry(m_Dimensions.x, m_Dimensions.y, m_Dimensions.z), *material);
 
 	// Set position
@@ -101,6 +101,7 @@ void DX::KinematicModel::Render()
 
 void DX::KinematicModel::Update(float delta)
 {
+	// m_Position.y -= delta;
 	m_Position.x += delta;
 
 	m_Body->setKinematicTarget(physx::PxTransform(physx::PxVec3(m_Position.x, m_Position.y, m_Position.z)));

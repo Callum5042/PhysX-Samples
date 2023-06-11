@@ -63,16 +63,17 @@ void DX::CharacterKinematicModel::CreateIndexBuffer()
 
 void DX::CharacterKinematicModel::CreatePhysicsActor()
 {
-	physx::PxMaterial* material = m_Physics->GetPhysics()->createMaterial(1.0f, 1.0f, 1.0f);
+	physx::PxMaterial* material = m_Physics->GetPhysics()->createMaterial(0.5f, 0.5f, 0.1f);
 
-	physx::PxBoxControllerDesc desc;
-	// physx::PxCapsuleControllerDesc desc;
-	/*desc.height = 2.0f;
-	desc.radius = 0.5f;*/
+	physx::PxCapsuleControllerDesc desc;
+	desc.height = 2.0f;
+	desc.radius = 0.5f;
 
+	/*physx::PxBoxControllerDesc desc;
 	desc.halfForwardExtent = m_Dimensions.z + 0.01f;
 	desc.halfHeight = m_Dimensions.y + 0.01f;
-	desc.halfSideExtent = m_Dimensions.x + 0.01f;
+	desc.halfSideExtent = m_Dimensions.x + 0.01f;*/
+
 	desc.position = physx::PxExtendedVec3(physx::PxReal(m_Position.x), physx::PxReal(m_Position.y), physx::PxReal(m_Position.z));
 	desc.density = 1000.0f;
 	desc.material = material;
@@ -122,11 +123,21 @@ void DX::CharacterKinematicModel::Render()
 
 void DX::CharacterKinematicModel::Update(float delta)
 {
-	physx::PxVec3 gravity = m_Physics->GetScene()->getGravity();
-	physx::PxVec3 velocity = gravity;
+	static bool isFalling = true;
 
-	physx::PxControllerFilters filters;
-	m_Controller->move(velocity * delta, 0.001f, delta, filters);
+	if (isFalling)
+	{
+		physx::PxVec3 gravity = m_Physics->GetScene()->getGravity();
+		physx::PxVec3 velocity = gravity;
+
+		physx::PxControllerFilters filters;
+		physx::PxControllerCollisionFlags flags = m_Controller->move(velocity * delta, 0.0f, delta, filters);
+
+		if (flags.isSet(physx::PxControllerCollisionFlag::eCOLLISION_DOWN))
+		{
+			// isFalling = false;
+		}
+	} 
 
 	// Update model
 	physx::PxExtendedVec3 position = m_Controller->getPosition();

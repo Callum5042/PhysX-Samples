@@ -31,7 +31,7 @@ int Applicataion::Execute()
     m_KinematicModel->Create(0.0f, 1.0f, 0.0f);
     
     m_CharacterKinematicModel = std::make_unique<DX::CharacterKinematicModel>(m_DxRenderer.get(), m_Physics.get());
-    m_CharacterKinematicModel->Create(0.0f, 2.0f, 0.0f);
+    m_CharacterKinematicModel->Create(0.0f, 5.0f, 0.0f);
 
     m_PlaneModel = std::make_unique<DX::PlaneModel>(m_DxRenderer.get(), m_Physics.get());
     m_PlaneModel->Create();
