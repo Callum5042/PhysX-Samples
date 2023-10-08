@@ -1,6 +1,7 @@
 #include "DxLineShader.h"
 #include <fstream>
 #include <vector>
+#include <Windows.h>
 
 DX::LineShader::LineShader(Renderer* renderer) : m_DxRenderer(renderer)
 {
@@ -52,7 +53,13 @@ void DX::LineShader::UpdateCamera(const CameraBuffer& buffer)
 void DX::LineShader::CreateVertexShader()
 {
 	// Load the binary file into memory
-	std::ifstream vertex_file("D:\\Sources\\PhysX Samples\\Kinematics\\Shaders\\LineVertexShader.cso", std::fstream::in | std::fstream::binary);
+	std::ifstream vertex_file("Shaders/LineVertexShader.cso", std::fstream::in | std::fstream::binary);
+	if (!vertex_file.is_open())
+	{
+		MessageBox(NULL, L"Could not open file 'Shaders/LineVertexShader.cso'", L"Error", MB_OK);
+		throw std::exception();
+	}
+
 	std::vector<char> vertex_data((std::istreambuf_iterator<char>(vertex_file)), std::istreambuf_iterator<char>());
 
 	// Create the vertex shader
@@ -72,7 +79,13 @@ void DX::LineShader::CreateVertexShader()
 void DX::LineShader::CreatePixelShader()
 {
 	// Load the binary file into memory
-	std::ifstream pixel_file("D:\\Sources\\PhysX Samples\\Kinematics\\Shaders\\LinePixelShader.cso", std::fstream::in | std::fstream::binary);
+	std::ifstream pixel_file("Shaders/LinePixelShader.cso", std::fstream::in | std::fstream::binary);
+	if (!pixel_file.is_open())
+	{
+		MessageBox(NULL, L"Could not open file 'Shaders/LinePixelShader.cso'", L"Error", MB_OK);
+		throw std::exception();
+	}
+
 	std::vector<char> pixel_data((std::istreambuf_iterator<char>(pixel_file)), std::istreambuf_iterator<char>());
 
 	// Create pixel shader
