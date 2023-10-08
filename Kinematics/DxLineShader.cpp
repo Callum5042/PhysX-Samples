@@ -52,7 +52,7 @@ void DX::LineShader::UpdateCamera(const CameraBuffer& buffer)
 void DX::LineShader::CreateVertexShader()
 {
 	// Load the binary file into memory
-	std::ifstream vertex_file("D:\\Sources\\PhysX Samples\\Test\\Shaders\\LineVertexShader.cso", std::fstream::in | std::fstream::binary);
+	std::ifstream vertex_file("D:\\Sources\\PhysX Samples\\Kinematics\\Shaders\\LineVertexShader.cso", std::fstream::in | std::fstream::binary);
 	std::vector<char> vertex_data((std::istreambuf_iterator<char>(vertex_file)), std::istreambuf_iterator<char>());
 
 	// Create the vertex shader
@@ -72,7 +72,7 @@ void DX::LineShader::CreateVertexShader()
 void DX::LineShader::CreatePixelShader()
 {
 	// Load the binary file into memory
-	std::ifstream pixel_file("D:\\Sources\\PhysX Samples\\Test\\Shaders\\LinePixelShader.cso", std::fstream::in | std::fstream::binary);
+	std::ifstream pixel_file("D:\\Sources\\PhysX Samples\\Kinematics\\Shaders\\LinePixelShader.cso", std::fstream::in | std::fstream::binary);
 	std::vector<char> pixel_data((std::istreambuf_iterator<char>(pixel_file)), std::istreambuf_iterator<char>());
 
 	// Create pixel shader
