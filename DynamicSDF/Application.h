@@ -38,7 +38,9 @@ private:
 	std::unique_ptr<DX::Renderer> m_DxRenderer = nullptr;
 	
 	// Direct3D 11 model
-	std::unique_ptr<DX::DynamicModel> m_DynamicModel = nullptr;
+	std::unique_ptr<DX::DynamicModel> m_DynamicModel1 = nullptr;
+	std::unique_ptr<DX::DynamicModel> m_DynamicModel2 = nullptr;
+	std::unique_ptr<DX::DynamicModel> m_DynamicModel3 = nullptr;
 	std::unique_ptr<DX::PlaneModel> m_PlaneModel = nullptr;
 
 	// Direct3D 11 shader

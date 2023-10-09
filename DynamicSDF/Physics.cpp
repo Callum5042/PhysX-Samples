@@ -62,12 +62,27 @@ void PX::Physics::CreateScene()
     // Create CPU dispatcher
     physx::PxDefaultCpuDispatcher* dispatcher = physx::PxDefaultCpuDispatcherCreate(2);
 
+    // Initialize cuda
+    physx::PxCudaContextManagerDesc cudaContextManagerDesc;
+    m_CudaContextManager = PxCreateCudaContextManager(*m_Foundation, cudaContextManagerDesc, PxGetProfilerCallback());
+    if (m_CudaContextManager && !m_CudaContextManager->contextIsValid())
+    {
+        m_CudaContextManager->release();
+        m_CudaContextManager = NULL;
+        printf("Failed to initialize cuda context.\n");
+    }
+
     // Create scene
     physx::PxSceneDesc scene_desc(m_Physics->getTolerancesScale());
     scene_desc.gravity = physx::PxVec3(0.0f, -9.81f, 0.0f);
     scene_desc.cpuDispatcher = dispatcher;
     scene_desc.filterShader = physx::PxDefaultSimulationFilterShader;
     // scene_desc.simulationEventCallback = this;
+
+    scene_desc.cudaContextManager = m_CudaContextManager;
+
+    scene_desc.flags |= physx::PxSceneFlag::eENABLE_GPU_DYNAMICS;
+    scene_desc.flags |= physx::PxSceneFlag::eENABLE_PCM;
 
     m_Scene = m_Physics->createScene(scene_desc);
 }

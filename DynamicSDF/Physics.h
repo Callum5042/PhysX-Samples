@@ -37,6 +37,8 @@ namespace PX
 		physx::PxDefaultAllocator m_DefaultAllocatorCallback;
 		void CreateFoundationAndPhysics();
 
+		physx::PxCudaContextManager* m_CudaContextManager = nullptr;
+
 		// Scene
 		physx::PxScene* m_Scene = nullptr;
 		void CreateScene();

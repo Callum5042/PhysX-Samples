@@ -1,6 +1,7 @@
 #include "DynamicModel.h"
 #include <DirectXMath.h>
 #include "GeometryGenerator.h"
+#include <PxPhysicsAPI.h>
 
 DX::DynamicModel::DynamicModel(DX::Renderer* renderer, PX::Physics* physics) : m_DxRenderer(renderer), m_Physics(physics)
 {
@@ -63,17 +64,76 @@ void DX::DynamicModel::CreateIndexBuffer()
 
 void DX::DynamicModel::CreatePhysicsActor()
 {
+	std::vector<physx::PxVec3> vecs;
+	for (auto& v : m_MeshData.vertices)
+	{
+		vecs.push_back(physx::PxVec3(v.x, v.y, v.z));
+	}
+
+	// Cook
+	physx::PxTriangleMeshDesc meshDesc;
+	meshDesc.points.count = m_MeshData.vertices.size();
+	meshDesc.points.stride = sizeof(physx::PxVec3);
+	meshDesc.points.data = vecs.data();
+
+	meshDesc.triangles.count = m_MeshData.indices.size();;
+	meshDesc.triangles.stride = 3 * sizeof(UINT);
+	meshDesc.triangles.data = m_MeshData.indices.data();
+
+	physx::PxSDFDesc sdfDesc;
+	sdfDesc.spacing = 0.5f;
+	sdfDesc.subgridSize = 6;
+	sdfDesc.bitsPerSubgridPixel = physx::PxSdfBitsPerSubgridPixel::e16_BIT_PER_PIXEL;
+	sdfDesc.numThreadsForSdfConstruction = 16;
+
+	meshDesc.sdfDesc = &sdfDesc;
+
+	physx::PxTolerancesScale scale;
+	physx::PxCookingParams params(scale);
+	params.meshWeldTolerance = 0.001f;
+	params.meshPreprocessParams = physx::PxMeshPreprocessingFlags(physx::PxMeshPreprocessingFlag::eWELD_VERTICES);
+	params.buildTriangleAdjacencies = false;
+	params.buildGPUData = true;
+
+	physx::PxDefaultMemoryOutputStream writeBuffer;
+	physx::PxTriangleMeshCookingResult::Enum result;
+
+	bool status = PxCookTriangleMesh(params, meshDesc, writeBuffer, &result);
+	if (!status)
+	{
+		return;
+	}
+
+	physx::PxDefaultMemoryInputData readBuffer(writeBuffer.getData(), writeBuffer.getSize());
+	auto mesh = m_Physics->GetPhysics()->createTriangleMesh(readBuffer);
+
+
+	// Create actor
+	// physx::PxRigidDynamic* m_Body = m_Physics->GetPhysics()->createRigidDynamic(physx::PxTransform(physx::PxVec3(0, 0, 0)));
+	m_Body = m_Physics->GetPhysics()->createRigidDynamic(physx::PxTransform(physx::PxVec3(m_Position.x, m_Position.y, m_Position.z)));
+
+	m_Body->setLinearDamping(0.2f);
+	m_Body->setAngularDamping(0.1f);
+
+	physx::PxTriangleMeshGeometry geom;
+	geom.triangleMesh = mesh;
+	geom.scale = physx::PxVec3(1.0f, 1.0f, 1.0f);
+
+	/*m_Body->setRigidBodyFlag(physx::PxRigidBodyFlag::eENABLE_GYROSCOPIC_FORCES, true);
+	m_Body->setRigidBodyFlag(physx::PxRigidBodyFlag::eENABLE_SPECULATIVE_CCD, true);*/
+
 	physx::PxMaterial* material = m_Physics->GetPhysics()->createMaterial(0.4f, 0.4f, 0.4f);
-	physx::PxShape* shape = m_Physics->GetPhysics()->createShape(physx::PxBoxGeometry(m_Dimensions.x, m_Dimensions.y, m_Dimensions.z), *material);
+	physx::PxShape* shape = physx::PxRigidActorExt::createExclusiveShape(*m_Body, geom, *material);
+	shape->setContactOffset(0.1f);
+	shape->setRestOffset(0.02f);
 
-	// Set position
-	physx::PxVec3 position = physx::PxVec3(physx::PxReal(m_Position.x), physx::PxReal(m_Position.y), physx::PxReal(m_Position.z));
-	physx::PxTransform transform(position);
+	physx::PxReal density = 100.f;
+	physx::PxRigidBodyExt::updateMassAndInertia(*m_Body, density);
 
-	m_Body = m_Physics->GetPhysics()->createRigidDynamic(transform);
-	m_Body->attachShape(*shape);
-	physx::PxRigidBodyExt::updateMassAndInertia(*m_Body, 100.0f);
 	m_Physics->GetScene()->addActor(*m_Body);
+
+	m_Body->setSolverIterationCounts(50, 1);
+	m_Body->setMaxDepenetrationVelocity(5.f);
 }
 
 void DX::DynamicModel::Render()
@@ -108,4 +168,3 @@ void DX::DynamicModel::Update()
 	World *= DirectX::XMMatrixRotationQuaternion(DirectX::XMVectorSet(global_pose.q.x, global_pose.q.y, global_pose.q.z, global_pose.q.w));
 	World *= DirectX::XMMatrixTranslation(m_Position.x, m_Position.y, m_Position.z);
 }
- 

@@ -51,7 +51,7 @@ namespace DX
 
 		// Physics
 		PX::Physics* m_Physics = nullptr;
-		physx::PxRigidBody* m_Body = nullptr;
+		physx::PxRigidDynamic* m_Body = nullptr;
 		void CreatePhysicsActor();
 	};
 }
