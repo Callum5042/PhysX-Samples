@@ -33,6 +33,10 @@ int Applicataion::Execute()
     m_PlaneModel = std::make_unique<DX::PlaneModel>(m_DxRenderer.get(), m_Physics.get());
     m_PlaneModel->Create();
 
+    // Link objects together
+    auto joint = physx::PxRevoluteJointCreate(*m_Physics->GetPhysics(), m_DynamicModel1->GetBody(), physx::PxTransform(physx::PxVec3(-2, 0, 0)), m_DynamicModel2->GetBody(), physx::PxTransform(physx::PxVec3(2, 0, 0)));
+    joint->setConstraintFlag(physx::PxConstraintFlag::eVISUALIZATION, true);
+
     // Starts the timer
     m_Timer.Start();
 
