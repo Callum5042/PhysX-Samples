@@ -34,7 +34,7 @@ int Applicataion::Execute()
     m_PlaneModel->Create();
 
     // Link objects together
-    auto joint = physx::PxRevoluteJointCreate(*m_Physics->GetPhysics(), m_DynamicModel1->GetBody(), physx::PxTransform(physx::PxVec3(-2, 0, 0)), m_DynamicModel2->GetBody(), physx::PxTransform(physx::PxVec3(2, 0, 0)));
+    auto joint = physx::PxFixedJointCreate(*m_Physics->GetPhysics(), m_DynamicModel1->GetBody(), physx::PxTransform(physx::PxVec3(-2, 0, 0)), m_DynamicModel2->GetBody(), physx::PxTransform(physx::PxVec3(2, 0, 0)));
     joint->setConstraintFlag(physx::PxConstraintFlag::eVISUALIZATION, true);
 
     // Starts the timer
