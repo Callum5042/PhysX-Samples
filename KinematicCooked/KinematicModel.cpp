@@ -76,7 +76,7 @@ void DX::KinematicModel::CreatePhysicsActor()
 	meshDesc.points.stride = sizeof(physx::PxVec3);
 	meshDesc.points.data = vecs.data();
 
-	meshDesc.triangles.count = m_MeshData.indices.size();;
+	meshDesc.triangles.count = m_MeshData.indices.size();
 	meshDesc.triangles.stride = 3 * sizeof(UINT);
 	meshDesc.triangles.data = m_MeshData.indices.data();
 

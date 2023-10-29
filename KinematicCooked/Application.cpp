@@ -95,7 +95,9 @@ int Applicataion::Execute()
             m_Physics->Simulate(m_Timer.DeltaTime());
 
             // Rotate kinematic model
-
+            auto pose = m_KinematicModel->GetBody()->getGlobalPose();
+            pose.q *= physx::PxQuat(m_Timer.DeltaTime(), physx::PxVec3(0.0f, 1.0f, 0.0f));
+            m_KinematicModel->GetBody()->setKinematicTarget(pose);
 
             // Clear the buffers
             m_DxRenderer->Clear();
