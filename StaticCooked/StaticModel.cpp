@@ -17,7 +17,8 @@ void DX::StaticModel::Create(float x, float y, float z, float width, float heigh
 	m_Position = DirectX::XMFLOAT3(x, y, z);
 	m_Dimensions = DirectX::XMFLOAT3(width, height, depth);
 
-	GeometryGenerator::CreateBox(width, height, depth, &m_MeshData);
+	GeometryGenerator::CreatePyramid(width, height, depth, &m_MeshData);
+	// GeometryGenerator::CreateBox(width, height, depth, &m_MeshData);
 
 	// Create input buffers
 	CreateVertexBuffer();
