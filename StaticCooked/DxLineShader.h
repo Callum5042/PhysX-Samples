@@ -3,7 +3,7 @@
 #include "DxRenderer.h"
 #include "DxShader.h"
 #include <DirectXMath.h>
-#include "DynamicModel.h"
+#include "StaticModel.h"
 
 namespace DX
 {

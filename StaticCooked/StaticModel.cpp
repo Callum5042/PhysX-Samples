@@ -1,18 +1,18 @@
-#include "DynamicModel.h"
+#include "StaticModel.h"
 #include <DirectXMath.h>
 #include "GeometryGenerator.h"
 
-DX::DynamicModel::DynamicModel(DX::Renderer* renderer, PX::Physics* physics) : m_DxRenderer(renderer), m_Physics(physics)
+DX::StaticModel::StaticModel(DX::Renderer* renderer, PX::Physics* physics) : m_DxRenderer(renderer), m_Physics(physics)
 {
 	Colour = DirectX::XMFLOAT4(1.0f, 0.0, 0.0f, 1.0f);
 }
 
-void DX::DynamicModel::Create(float x, float y, float z)
+void DX::StaticModel::Create(float x, float y, float z)
 {
 	Create(x, y, z, 1.0f, 1.0f, 1.0f);
 }
 
-void DX::DynamicModel::Create(float x, float y, float z, float width, float height, float depth)
+void DX::StaticModel::Create(float x, float y, float z, float width, float height, float depth)
 {
 	m_Position = DirectX::XMFLOAT3(x, y, z);
 	m_Dimensions = DirectX::XMFLOAT3(width, height, depth);
@@ -29,7 +29,7 @@ void DX::DynamicModel::Create(float x, float y, float z, float width, float heig
 	World *= DirectX::XMMatrixTranslation(x, y, z);
 }
 
-void DX::DynamicModel::CreateVertexBuffer()
+void DX::StaticModel::CreateVertexBuffer()
 {
 	auto d3dDevice = m_DxRenderer->GetDevice();
 
@@ -45,7 +45,7 @@ void DX::DynamicModel::CreateVertexBuffer()
 	DX::Check(d3dDevice->CreateBuffer(&vertex_buffer_desc, &vertex_subdata, m_d3dVertexBuffer.ReleaseAndGetAddressOf()));
 }
 
-void DX::DynamicModel::CreateIndexBuffer()
+void DX::StaticModel::CreateIndexBuffer()
 {
 	auto d3dDevice = m_DxRenderer->GetDevice();
 
@@ -61,7 +61,7 @@ void DX::DynamicModel::CreateIndexBuffer()
 	DX::Check(d3dDevice->CreateBuffer(&index_buffer_desc, &index_subdata, m_d3dIndexBuffer.ReleaseAndGetAddressOf()));
 }
 
-void DX::DynamicModel::CreatePhysicsActor()
+void DX::StaticModel::CreatePhysicsActor()
 {
 	physx::PxMaterial* material = m_Physics->GetPhysics()->createMaterial(0.4f, 0.4f, 0.4f);
 	physx::PxShape* shape = m_Physics->GetPhysics()->createShape(physx::PxBoxGeometry(m_Dimensions.x, m_Dimensions.y, m_Dimensions.z), *material);
@@ -70,13 +70,12 @@ void DX::DynamicModel::CreatePhysicsActor()
 	physx::PxVec3 position = physx::PxVec3(physx::PxReal(m_Position.x), physx::PxReal(m_Position.y), physx::PxReal(m_Position.z));
 	physx::PxTransform transform(position);
 
-	m_Body = m_Physics->GetPhysics()->createRigidDynamic(transform);
+	m_Body = m_Physics->GetPhysics()->createRigidStatic(transform);
 	m_Body->attachShape(*shape);
-	physx::PxRigidBodyExt::updateMassAndInertia(*m_Body, 100.0f);
 	m_Physics->GetScene()->addActor(*m_Body);
 }
 
-void DX::DynamicModel::Render()
+void DX::StaticModel::Render()
 {
 	auto d3dDeviceContext = m_DxRenderer->GetDeviceContext();
 
@@ -97,7 +96,7 @@ void DX::DynamicModel::Render()
 	d3dDeviceContext->DrawIndexed(static_cast<UINT>(m_MeshData.indices.size()), 0, 0);
 }
 
-void DX::DynamicModel::Update()
+void DX::StaticModel::Update()
 {
 	physx::PxTransform global_pose = m_Body->getGlobalPose();
 	m_Position.x = global_pose.p.x;

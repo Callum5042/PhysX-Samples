@@ -24,8 +24,8 @@ int Applicataion::Execute()
     m_Physics->Setup();
 
     // Create models
-    m_DynamicModel = std::make_unique<DX::DynamicModel>(m_DxRenderer.get(), m_Physics.get());
-    m_DynamicModel->Create(0.0f, 5.0f, 0.0f);
+    m_StaticModel = std::make_unique<DX::StaticModel>(m_DxRenderer.get(), m_Physics.get());
+    m_StaticModel->Create(0.0f, 2.0f, 0.0f);
 
     m_PlaneModel = std::make_unique<DX::PlaneModel>(m_DxRenderer.get(), m_Physics.get());
     m_PlaneModel->Create();
@@ -87,9 +87,9 @@ int Applicataion::Execute()
             m_DxShader->Use();
 
             // Render the model
-            m_DynamicModel->Update();
-            m_DxShader->UpdateWorldBuffer(m_DynamicModel->World, m_DynamicModel->Colour);
-            m_DynamicModel->Render();
+            m_StaticModel->Update();
+            m_DxShader->UpdateWorldBuffer(m_StaticModel->World, m_StaticModel->Colour);
+            m_StaticModel->Render();
 
             // Render the floor
             m_DxShader->UpdateWorldBuffer(m_PlaneModel->World, m_PlaneModel->Colour);

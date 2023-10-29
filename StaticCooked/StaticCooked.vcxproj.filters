@@ -33,7 +33,7 @@
     <ClCompile Include="DxRenderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="DynamicModel.cpp">
+    <ClCompile Include="StaticModel.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="DxShader.cpp">
@@ -68,7 +68,7 @@
     <ClInclude Include="DxRenderer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="DynamicModel.h">
+    <ClInclude Include="StaticModel.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="DxShader.h">

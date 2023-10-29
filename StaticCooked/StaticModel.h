@@ -7,11 +7,11 @@
 
 namespace DX
 {
-	class DynamicModel
+	class StaticModel
 	{
 	public:
-		DynamicModel(DX::Renderer* renderer, PX::Physics* physics);
-		virtual ~DynamicModel() = default;
+		StaticModel(DX::Renderer* renderer, PX::Physics* physics);
+		virtual ~StaticModel() = default;
 
 		// Create device
 		void Create(float x, float y, float z);
@@ -30,7 +30,7 @@ namespace DX
 		DirectX::XMFLOAT4 Colour = DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 
 		// Get actor
-		inline physx::PxRigidBody* GetBody() { return m_Body; }
+		inline physx::PxRigidStatic* GetBody() { return m_Body; }
 
 	private:
 		DX::Renderer* m_DxRenderer = nullptr;
@@ -51,7 +51,7 @@ namespace DX
 
 		// Physics
 		PX::Physics* m_Physics = nullptr;
-		physx::PxRigidBody* m_Body = nullptr;
+		physx::PxRigidStatic* m_Body = nullptr;
 		void CreatePhysicsActor();
 	};
 }
