@@ -24,8 +24,11 @@ int Applicataion::Execute()
     m_Physics->Setup();
 
     // Create models
+    m_DynamicModel = std::make_unique<DX::DynamicModel>(m_DxRenderer.get(), m_Physics.get());
+    m_DynamicModel->Create(0.0f, 4.0f, 0.0f);
+
     m_StaticModel = std::make_unique<DX::StaticModel>(m_DxRenderer.get(), m_Physics.get());
-    m_StaticModel->Create(0.0f, 2.0f, 0.0f);
+    m_StaticModel->Create(0.0f, 1.0f, 4.0f);
 
     m_PlaneModel = std::make_unique<DX::PlaneModel>(m_DxRenderer.get(), m_Physics.get());
     m_PlaneModel->Create();
@@ -72,6 +75,17 @@ int Applicataion::Execute()
                 // Update world constant buffer with new camera view and perspective
                 SetCameraBuffer();
             }
+            else if (e.type == SDL_KEYDOWN)
+            {
+                if (e.key.keysym.scancode == SDL_SCANCODE_RIGHT)
+                {
+                    m_DynamicModel->ApplyForce(10000.0f, 0.0f, 0.0f);
+                }
+                else if (e.key.keysym.scancode == SDL_SCANCODE_LEFT)
+                {
+                    m_DynamicModel->ApplyForce(-10000.0f, 0.0f, 0.0f);
+                }
+            }
         }
         else
         {
@@ -87,6 +101,10 @@ int Applicataion::Execute()
             m_DxShader->Use();
 
             // Render the model
+            m_DynamicModel->Update();
+            m_DxShader->UpdateWorldBuffer(m_DynamicModel->World, m_DynamicModel->Colour);
+            m_DynamicModel->Render();
+
             m_StaticModel->Update();
             m_DxShader->UpdateWorldBuffer(m_StaticModel->World, m_StaticModel->Colour);
             m_StaticModel->Render();

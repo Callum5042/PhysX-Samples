@@ -1,18 +1,19 @@
-#include "StaticModel.h"
+#include "DynamicModel.h"
 #include <DirectXMath.h>
 #include "GeometryGenerator.h"
+#include <SDL.h>
 
-DX::StaticModel::StaticModel(DX::Renderer* renderer, PX::Physics* physics) : m_DxRenderer(renderer), m_Physics(physics)
+DX::DynamicModel::DynamicModel(DX::Renderer* renderer, PX::Physics* physics) : m_DxRenderer(renderer), m_Physics(physics)
 {
 	Colour = DirectX::XMFLOAT4(1.0f, 0.0, 0.0f, 1.0f);
 }
 
-void DX::StaticModel::Create(float x, float y, float z)
+void DX::DynamicModel::Create(float x, float y, float z)
 {
 	Create(x, y, z, 1.0f, 1.0f, 1.0f);
 }
 
-void DX::StaticModel::Create(float x, float y, float z, float width, float height, float depth)
+void DX::DynamicModel::Create(float x, float y, float z, float width, float height, float depth)
 {
 	m_Position = DirectX::XMFLOAT3(x, y, z);
 	m_Dimensions = DirectX::XMFLOAT3(width, height, depth);
@@ -29,7 +30,7 @@ void DX::StaticModel::Create(float x, float y, float z, float width, float heigh
 	World *= DirectX::XMMatrixTranslation(x, y, z);
 }
 
-void DX::StaticModel::CreateVertexBuffer()
+void DX::DynamicModel::CreateVertexBuffer()
 {
 	auto d3dDevice = m_DxRenderer->GetDevice();
 
@@ -45,7 +46,7 @@ void DX::StaticModel::CreateVertexBuffer()
 	DX::Check(d3dDevice->CreateBuffer(&vertex_buffer_desc, &vertex_subdata, m_d3dVertexBuffer.ReleaseAndGetAddressOf()));
 }
 
-void DX::StaticModel::CreateIndexBuffer()
+void DX::DynamicModel::CreateIndexBuffer()
 {
 	auto d3dDevice = m_DxRenderer->GetDevice();
 
@@ -61,21 +62,22 @@ void DX::StaticModel::CreateIndexBuffer()
 	DX::Check(d3dDevice->CreateBuffer(&index_buffer_desc, &index_subdata, m_d3dIndexBuffer.ReleaseAndGetAddressOf()));
 }
 
-void DX::StaticModel::CreatePhysicsActor()
+void DX::DynamicModel::CreatePhysicsActor()
 {
-	physx::PxMaterial* material = m_Physics->GetPhysics()->createMaterial(0.4f, 0.4f, 0.4f);
+	physx::PxMaterial* material = m_Physics->GetPhysics()->createMaterial(0.1f, 0.1f, 0.1f);
 	physx::PxShape* shape = m_Physics->GetPhysics()->createShape(physx::PxBoxGeometry(m_Dimensions.x, m_Dimensions.y, m_Dimensions.z), *material);
 
 	// Set position
 	physx::PxVec3 position = physx::PxVec3(physx::PxReal(m_Position.x), physx::PxReal(m_Position.y), physx::PxReal(m_Position.z));
 	physx::PxTransform transform(position);
 
-	m_Body = m_Physics->GetPhysics()->createRigidStatic(transform);
+	m_Body = m_Physics->GetPhysics()->createRigidDynamic(transform);
 	m_Body->attachShape(*shape);
+	physx::PxRigidBodyExt::updateMassAndInertia(*m_Body, 100.0f);
 	m_Physics->GetScene()->addActor(*m_Body);
 }
 
-void DX::StaticModel::Render()
+void DX::DynamicModel::Render()
 {
 	auto d3dDeviceContext = m_DxRenderer->GetDeviceContext();
 
@@ -96,8 +98,29 @@ void DX::StaticModel::Render()
 	d3dDeviceContext->DrawIndexed(static_cast<UINT>(m_MeshData.indices.size()), 0, 0);
 }
 
-void DX::StaticModel::Update()
+void DX::DynamicModel::Update()
 {
+	// Move around
+	const Uint8* keystate = SDL_GetKeyboardState(nullptr);
+	if (keystate[SDL_SCANCODE_UP])
+	{
+		this->ApplyForce(0.0f, 0.0f, 10000.0f);
+	}
+	else if (keystate[SDL_SCANCODE_DOWN])
+	{
+		this->ApplyForce(-0.0f, 0.0f, -10000.0f);
+	}
+
+	if (keystate[SDL_SCANCODE_RIGHT])
+	{
+		this->ApplyForce(10000.0f, 0.0f, 0.0f);
+	}
+	else if (keystate[SDL_SCANCODE_LEFT])
+	{
+		this->ApplyForce(-10000.0f, 0.0f, 0.0f);
+	}
+
+	// Update
 	physx::PxTransform global_pose = m_Body->getGlobalPose();
 	m_Position.x = global_pose.p.x;
 	m_Position.y = global_pose.p.y;
@@ -107,13 +130,8 @@ void DX::StaticModel::Update()
 	World *= DirectX::XMMatrixRotationQuaternion(DirectX::XMVectorSet(global_pose.q.x, global_pose.q.y, global_pose.q.z, global_pose.q.w));
 	World *= DirectX::XMMatrixTranslation(m_Position.x, m_Position.y, m_Position.z);
 }
- 
-void DX::StaticModel::MoveRight()
-{
-	physx::PxTransform global_pose = m_Body->getGlobalPose();
-	global_pose.p.x += 1.0f;
-	global_pose.p.y;
-	global_pose.p.z;
 
-	m_Body->setGlobalPose(global_pose);
+void DX::DynamicModel::ApplyForce(float x, float y, float z)
+{
+	m_Body->addForce(physx::PxVec3(x, y, z), physx::PxForceMode::eFORCE);
 }
