@@ -9,7 +9,7 @@ DX::StaticModel::StaticModel(DX::Renderer* renderer, PX::Physics* physics) : m_D
 
 void DX::StaticModel::Create(float x, float y, float z)
 {
-	Create(x, y, z, 1.0f, 1.0f, 1.0f);
+	Create(x, y, z, 4.0f, 1.0f, 0.5f);
 }
 
 void DX::StaticModel::Create(float x, float y, float z, float width, float height, float depth)
@@ -63,15 +63,59 @@ void DX::StaticModel::CreateIndexBuffer()
 
 void DX::StaticModel::CreatePhysicsActor()
 {
+	std::vector<physx::PxVec3> vecs;
+	for (auto& v : m_MeshData.vertices)
+	{
+		vecs.push_back(physx::PxVec3(v.x, v.y, v.z));
+	}
+
+	// Cook
+	physx::PxTriangleMeshDesc meshDesc;
+	meshDesc.points.count = m_MeshData.vertices.size();
+	meshDesc.points.stride = sizeof(physx::PxVec3);
+	meshDesc.points.data = vecs.data();
+
+	meshDesc.triangles.count = m_MeshData.indices.size();;
+	meshDesc.triangles.stride = 3 * sizeof(UINT);
+	meshDesc.triangles.data = m_MeshData.indices.data();
+
+	physx::PxTolerancesScale scale;
+	physx::PxCookingParams params(scale);
+	params.meshWeldTolerance = 0.001f;
+	params.meshPreprocessParams = physx::PxMeshPreprocessingFlags(physx::PxMeshPreprocessingFlag::eWELD_VERTICES);
+	params.buildTriangleAdjacencies = false;
+	params.buildGPUData = true;
+
+	physx::PxDefaultMemoryOutputStream writeBuffer;
+	physx::PxTriangleMeshCookingResult::Enum result;
+
+	bool status = PxCookTriangleMesh(params, meshDesc, writeBuffer, &result);
+	if (!status)
+	{
+		return;
+	}
+
+	physx::PxDefaultMemoryInputData readBuffer(writeBuffer.getData(), writeBuffer.getSize());
+	auto mesh = m_Physics->GetPhysics()->createTriangleMesh(readBuffer);
+
+	physx::PxTriangleMeshGeometry geom;
+	geom.triangleMesh = mesh;
+	geom.scale = physx::PxVec3(1.0f, 1.0f, 1.0f);
+
+
 	physx::PxMaterial* material = m_Physics->GetPhysics()->createMaterial(0.4f, 0.4f, 0.4f);
-	physx::PxShape* shape = m_Physics->GetPhysics()->createShape(physx::PxBoxGeometry(m_Dimensions.x, m_Dimensions.y, m_Dimensions.z), *material);
+	// physx::PxShape* shape = m_Physics->GetPhysics()->createShape(physx::PxBoxGeometry(m_Dimensions.x, m_Dimensions.y, m_Dimensions.z), *material);
 
 	// Set position
 	physx::PxVec3 position = physx::PxVec3(physx::PxReal(m_Position.x), physx::PxReal(m_Position.y), physx::PxReal(m_Position.z));
 	physx::PxTransform transform(position);
-
 	m_Body = m_Physics->GetPhysics()->createRigidStatic(transform);
-	m_Body->attachShape(*shape);
+
+	physx::PxShape* shape = physx::PxRigidActorExt::createExclusiveShape(*m_Body, geom, *material);
+	shape->setContactOffset(0.1f);
+	shape->setRestOffset(0.02f);
+
+	
 	m_Physics->GetScene()->addActor(*m_Body);
 }
 
@@ -106,14 +150,4 @@ void DX::StaticModel::Update()
 	World = DirectX::XMMatrixIdentity();
 	World *= DirectX::XMMatrixRotationQuaternion(DirectX::XMVectorSet(global_pose.q.x, global_pose.q.y, global_pose.q.z, global_pose.q.w));
 	World *= DirectX::XMMatrixTranslation(m_Position.x, m_Position.y, m_Position.z);
-}
- 
-void DX::StaticModel::MoveRight()
-{
-	physx::PxTransform global_pose = m_Body->getGlobalPose();
-	global_pose.p.x += 1.0f;
-	global_pose.p.y;
-	global_pose.p.z;
-
-	m_Body->setGlobalPose(global_pose);
 }

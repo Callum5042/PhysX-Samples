@@ -32,9 +32,6 @@ namespace DX
 		// Get actor
 		inline physx::PxRigidStatic* GetBody() { return m_Body; }
 
-		// Move object
-		void MoveRight();
-
 	private:
 		DX::Renderer* m_DxRenderer = nullptr;
 
