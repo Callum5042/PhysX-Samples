@@ -73,8 +73,8 @@ void DX::KinematicModel::CreatePhysicsActor()
 	// Cook
 	physx::PxTriangleMeshDesc meshDesc;
 	meshDesc.points.count = m_MeshData.vertices.size();
-	meshDesc.points.stride = sizeof(physx::PxVec3);
-	meshDesc.points.data = vecs.data();
+	meshDesc.points.stride = sizeof(DX::Vertex); // sizeof(physx::PxVec3);
+	meshDesc.points.data = m_MeshData.vertices.data(); // vecs.data();
 
 	meshDesc.triangles.count = m_MeshData.indices.size();
 	meshDesc.triangles.stride = 3 * sizeof(UINT);
@@ -85,7 +85,7 @@ void DX::KinematicModel::CreatePhysicsActor()
 	params.meshWeldTolerance = 0.001f;
 	params.meshPreprocessParams = physx::PxMeshPreprocessingFlags(physx::PxMeshPreprocessingFlag::eWELD_VERTICES);
 	params.buildTriangleAdjacencies = false;
-	params.buildGPUData = true;
+	//params.buildGPUData = true;
 
 	physx::PxDefaultMemoryOutputStream writeBuffer;
 	physx::PxTriangleMeshCookingResult::Enum result;
